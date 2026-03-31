@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masters Pool 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #1a3a2a;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --cream: #f5f0e8;
+  --border: rgba(201,168,76,0.25);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--green); min-height: 100vh; color: var(--cream); overflow-x: hidden; }
+body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 20% 0%, rgba(201,168,76,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(74,124,94,0.15) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+.header { text-align: center; padding: 3rem 1rem 2rem; position: relative; z-index: 1; }
+.header-flag { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 0.5rem; }
+.flag-line { width: 60px; height: 1px; background: var(--gold); opacity: 0.6; }
+.header-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+.header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 700; color: var(--cream); line-height: 1.1; margin-bottom: 0.5rem; }
+.header h1 span { color: var(--gold); }
+.header-sub { font-size: 13px; color: rgba(245,240,232,0.55); letter-spacing: 1px; }
+.card { background: rgba(245,240,232,0.04); border: 0.5px solid var(--border); border-radius: 16px; backdrop-filter: blur(8px); }
+.container { max-width: 780px; margin: 0 auto; padding: 0 1rem 4rem; position: relative; z-index: 1; }
+.tabs { display: flex; gap: 4px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 4px; margin-bottom: 1.5rem; }
+.tab-btn { flex: 1; padding: 9px 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; border: none; border-radius: 9px; cursor: pointer; transition: all 0.2s; color: rgba(245,240,232,0.5); background: none; letter-spacing: 0.3px; }
+.tab-btn.active { background: var(--gold); color: var(--green); }
+.tab-btn:hover:not(.active) { color: var(--cream); }
+.page { display: none; }
+.page.active { display: block; }
+.tier-header-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px 8px; }
+.tier-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tier-name { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; }
+.tier-desc { font-size: 12px; color: rgba(245,240,232,0.5); flex: 1; }
+.tier-count { font-size: 11px; color: var(--gold); opacity: 0.7; }
+.player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; padding: 0 14px 12px; }
+.player-chip { padding: 7px 10px; border-radius: 8px; border: 0.5px solid rgba(245,240,232,0.12); background: rgba(255,255,255,0.04); }
+.player-chip .pname { font-size: 12px; font-weight: 500; color: var(--cream); display: block; }
+.player-chip.taken { opacity: 0.35; }
+.player-chip.taken .pname::after { content: ' \2713'; font-size: 10px; color: var(--gold); }
+.form-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-bottom: 8px; display: block; }
+.form-input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.06); border: 0.5px solid var(--border); border-radius: 10px; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border 0.2s; }
+.form-input::placeholder { color: rgba(245,240,232,0.3); }
+.form-input:focus { border-color: var(--gold); }
+.tier-pick-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 0.5px solid rgba(245,240,232,0.06); }
+.tier-pick-row:last-child { border-bottom: none; }
+.tier-pill { font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 20px; min-width: 52px; text-align: center; flex-shrink: 0; }
+.pick-player-name { flex: 1; font-size: 13px; }
+.pick-player-name.empty { color: rgba(245,240,232,0.3); font-style: italic; }
+.pick-btn { padding: 5px 14px; border-radius: 7px; font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; border: 0.5px solid var(--border); background: rgba(255,255,255,0.05); color: var(--cream); }
+.pick-btn:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+.pick-btn.clear-btn { border-color: rgba(192,57,43,0.4); color: rgba(192,57,43,0.8); background: none; margin-left: 4px; }
+.pick-btn.clear-btn:hover { background: rgba(192,57,43,0.1); }
+.submit-btn { width: 100%; padding: 14px; background: var(--gold); border: none; border-radius: 12px; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: var(--green); cursor: pointer; transition: all 0.2s; margin-top: 1.5rem; }
+.submit-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.overlay { position: fixed; inset: 0; z-index: 200; background: rgba(10,25,15,0.85); display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.overlay.open { opacity: 1; pointer-events: all; }
+.picker-panel { background: #1e3d2a; border: 0.5px solid var(--border); border-radius: 20px; width: 100%; max-width: 480px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.2s; }
+.overlay.open .picker-panel { transform: scale(1); }
+.picker-header { padding: 18px 20px 14px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.picker-title { font-family: 'Playfair Display', serif; font-size: 17px; }
+.picker-close { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.08); border: none; color: var(--cream); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.picker-list { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 5px; }
+.picker-item { padding: 10px 14px; border-radius: 10px; border: 0.5px solid rgba(245,240,232,0.08); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.15s; font-size: 14px; font-weight: 500; }
+.picker-item:hover:not(.taken) { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.3); }
+.picker-item.taken { opacity: 0.3; cursor: not-allowed; }
+.success-panel { text-align: center; padding: 3rem 1.5rem; }
+.success-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 1.5rem; }
+.success-panel h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 0.5rem; }
+.entry-count-badge { display: inline-flex; align-items: center; background: rgba(201,168,76,0.15); border: 0.5px solid rgba(201,168,76,0.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: var(--gold); }
+.lb-row { display: grid; grid-template-columns: 36px 1fr 64px; gap: 8px; align-items: start; padding: 14px 16px; margin-bottom: 6px; border-radius: 12px; }
+.lb-row.first { border: 0.5px solid rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); }
+.lb-rank { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); font-weight: 600; padding-top: 2px; }
+.lb-name { font-size: 15px; font-weight: 500; margin-bottom: 5px; }
+.lb-picks { display: flex; flex-wrap: wrap; gap: 3px; }
+.lb-pill { font-size: 10px; padding: 2px 8px; border-radius: 20px; }
+.lb-score-col { text-align: right; }
+.lb-score { font-size: 20px; font-weight: 600; font-family: 'Playfair Display', serif; }
+.lb-score.under { color: #5dba7a; }
+.lb-score.over { color: #e07070; }
+.lb-score.even { color: var(--gold); }
+.lb-detail { font-size: 10px; color: rgba(245,240,232,0.35); margin-top: 2px; }
+.lb-hidden-note { text-align: center; padding: 3rem 1rem; }
+.lb-hidden-note .lock { font-size: 2.5rem; margin-bottom: 1rem; }
+.lb-hidden-note p { font-size: 14px; color: rgba(245,240,232,0.5); line-height: 1.6; }
+.no-scores-note { text-align: center; padding: 0.5rem 1rem 1.25rem; font-size: 13px; color: rgba(245,240,232,0.4); }
+.admin-login { max-width: 380px; margin: 0 auto; padding: 2rem 0; }
+.admin-row { display: grid; grid-template-columns: 1fr repeat(6, 66px) 44px; gap: 4px; align-items: center; padding: 9px 12px; border-bottom: 0.5px solid rgba(245,240,232,0.06); font-size: 12px; }
+.admin-row.header-row { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); opacity: 0.7; }
+.score-in { width: 100%; padding: 5px 4px; text-align: center; background: rgba(255,255,255,0.06); border: 0.5px solid rgba(245,240,232,0.15); border-radius: 6px; color: var(--cream); font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none; }
+.score-in:focus { border-color: var(--gold); }
+.admin-btn { padding: 9px 20px; border-radius: 8px; border: none; font-weight: 500; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.admin-btn.gold { background: var(--gold); color: var(--green); }
+.admin-btn.gold:hover { background: var(--gold-light); }
+.admin-btn.muted { background: rgba(255,255,255,0.07); color: rgba(245,240,232,0.65); }
+.admin-btn.danger { background: rgba(192,57,43,0.45); color: white; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; }
+.toggle-label { font-size: 13px; }
+.toggle-switch { position: relative; width: 44px; height: 24px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.15); border-radius: 24px; cursor: pointer; transition: 0.2s; }
+.toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+.toggle-switch input:checked + .toggle-slider { background: var(--gold); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+.alert-box { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-top: 0.75rem; background: rgba(192,57,43,0.12); border: 0.5px solid rgba(192,57,43,0.3); color: #e07070; }
+.success-box { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-top: 0.75rem; background: rgba(93,186,122,0.1); border: 0.5px solid rgba(93,186,122,0.3); color: #5dba7a; line-height: 1.6; }
+.del-btn { padding: 3px 0; border-radius: 6px; font-size: 13px; border: 0.5px solid rgba(192,57,43,0.3); background: none; color: rgba(192,57,43,0.7); cursor: pointer; width: 100%; }
+.del-btn:hover { background: rgba(192,57,43,0.1); }
+.scroll-hint { font-size: 11px; color: rgba(245,240,232,0.3); text-align: right; margin-bottom: 4px; }
+.overflow-table { overflow-x: auto; border-radius: 12px; border: 0.5px solid var(--border); }
+.spinner { display: flex; align-items: center; justify-content: center; padding: 3rem; }
+.spin { width: 28px; height: 28px; border: 2px solid rgba(201,168,76,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sync-line { font-size: 11px; color: rgba(245,240,232,0.3); text-align: right; margin-top: 8px; }
+.refresh-btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; border: 0.5px solid var(--border); background: rgba(255,255,255,0.04); color: rgba(245,240,232,0.6); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.refresh-btn:hover { color: var(--cream); border-color: var(--gold); }
+.setup-step { display: flex; gap: 12px; margin-bottom: 1.25rem; }
+.step-num { width: 26px; height: 26px; border-radius: 50%; background: rgba(201,168,76,0.12); border: 0.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+.step-text { font-size: 13px; color: rgba(245,240,232,0.75); line-height: 1.7; }
+.step-text a { color: var(--gold); }
+inlinecode { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; font-size: 11px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-flag">
+    <div class="flag-line"></div>
+    <span class="header-eyebrow">Augusta National · April 9–12</span>
+    <div class="flag-line"></div>
+  </div>
+  <h1>Masters Pool <span>'26</span></h1>
+  <div class="header-sub">Pick one from each tier &nbsp;·&nbsp; Best 5 of 6 scores wins</div>
+  <div style="margin-top:0.75rem;display:inline-block;background:rgba(201,168,76,0.12);border:0.5px solid rgba(201,168,76,0.35);border-radius:20px;padding:6px 18px;font-size:13px;color:var(--gold);">
+    Interested in playing for money? Venmo <strong>@AidanMacaluso</strong> $10
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('pick',this)">Make Picks</button>
+    <button class="tab-btn" onclick="switchTab('field',this)">The Field</button>
+    <button class="tab-btn" onclick="switchTab('rules',this)">Rules</button>
+    <button class="tab-btn" onclick="switchTab('leaderboard',this)">Leaderboard</button>
+    <button class="tab-btn" onclick="switchTab('admin',this)">Admin</button>
+  </div>
+  <div id="page-pick"        class="page active"></div>
+  <div id="page-field"       class="page"></div>
+  <div id="page-rules"       class="page"></div>
+  <div id="page-leaderboard" class="page"></div>
+  <div id="page-admin"       class="page"></div>
+</div>
+
+<div class="overlay" id="pickerOverlay">
+  <div class="picker-panel">
+    <div class="picker-header">
+      <div class="picker-title" id="pickerTitle"></div>
+      <button class="picker-close" onclick="closePicker()">&#x2715;</button>
+    </div>
+    <div class="picker-list" id="pickerList"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const ADMIN_PASS = 'casper2165';
+
+let BIN_ID  = '69cb143b856a682189e3f167';
+let API_KEY = '$2a$10$HOQ6COSrpqJeV.1v.D2vXOHpiIjq6UtcyCOIeBTt57ZfWp.8nF3M.';
+
+// ── TIERS ─────────────────────────────────────────────────────────────────────
+const TC = ['#c9a84c','#7aad8a','#7aa8c9','#c97a7a','#a87ac9','#888888'];
+const TB = ['rgba(201,168,76,.15)','rgba(122,173,138,.15)','rgba(122,168,201,.15)','rgba(201,122,122,.15)','rgba(168,122,201,.15)','rgba(136,136,136,.12)'];
+
+const TIERS = [
+  {id:1,label:'Tier 1',desc:'Elite',players:['Scottie Scheffler','Rory McIlroy','Bryson DeChambeau','Jon Rahm','Ludvig Aberg','Xander Schauffele','Tommy Fleetwood','Collin Morikawa']},
+  {id:2,label:'Tier 2',desc:'Strong contenders',players:['Cameron Young','Patrick Reed','Matt Fitzpatrick','Justin Rose','Chris Gotterup','Hideki Matsuyama','Viktor Hovland','Brooks Koepka']},
+  {id:3,label:'Tier 3',desc:'Value picks',players:['Justin Thomas','Robert MacIntyre','Jordan Spieth','Tyrrell Hatton','Shane Lowry','Patrick Cantlay','Joaquin Niemann','Ben Griffin']},
+  {id:4,label:'Tier 4',desc:'Sleepers',players:['Si Woo Kim','Jake Knapp','Corey Conners','Akshay Bhatia','Russell Henley','Min Woo Lee','Max Homa','Jason Day']},
+  {id:5,label:'Tier 5',desc:'Dark horses',players:['Cameron Smith','Adam Scott','Sepp Straka','Sam Burns','Daniel Berger','Sung-Jae Im','Sahith Theegala','Gary Woodland']},
+  {id:6,label:'Tier 6',desc:'Long shots & legends',players:['Marco Penge','Wyndham Clark','Will Zalatoris','Nicolai Hojgaard','Jacob Bridgeman','J.J. Spaun','Harris English','Dustin Johnson','Sergio Garcia','Matt McCarty','Tiger Woods','Phil Mickelson','Nico Echavarria','Bubba Watson','Mason Howell','Harry Hall','Keegan Bradley','Maverick McNealy']},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let pendingPicks = {};
+let remoteData   = {entries:[], settings:{picksVisible:false}};
+let isAdmin      = false;
+let lastSync     = null;
+
+// ── JSONBIN ───────────────────────────────────────────────────────────────────
+async function readBin() {
+  if (!BIN_ID||!API_KEY) return null;
+  try {
+    const r = await fetch('https://api.jsonbin.io/v3/b/'+BIN_ID+'/latest',{headers:{'X-Master-Key':API_KEY}});
+    if (!r.ok) return null;
+    return (await r.json()).record;
+  } catch(e){return null;}
+}
+async function writeBin(d) {
+  if (!BIN_ID||!API_KEY) return false;
+  try {
+    const r = await fetch('https://api.jsonbin.io/v3/b/'+BIN_ID,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},body:JSON.stringify(d)});
+    return r.ok;
+  } catch(e){return false;}
+}
+async function createBin(key) {
+  try {
+    const r = await fetch('https://api.jsonbin.io/v3/b',{method:'POST',headers:{'Content-Type':'application/json','X-Master-Key':key,'X-Bin-Name':'masters-pool-2026','X-Bin-Private':'true'},body:JSON.stringify({entries:[],settings:{picksVisible:false}})});
+    if (!r.ok) return null;
+    return (await r.json()).metadata.id;
+  } catch(e){return null;}
+}
+async function loadRemote() {
+  const d = await readBin();
+  if (d) {
+    remoteData = d;
+    if (!remoteData.entries)  remoteData.entries  = [];
+    if (!remoteData.settings) remoteData.settings = {picksVisible:false};
+    lastSync = new Date();
+    return true;
+  }
+  return false;
+}
+async function saveRemote() {
+  const ok = await writeBin(remoteData);
+  if (ok) lastSync = new Date();
+  return ok;
+}
+function configured() { return true; }
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function takenPlayers(excludeName) {
+  const s = new Set();
+  remoteData.entries.forEach(e=>{if(e.name===excludeName)return; Object.values(e.picks||{}).forEach(p=>s.add(p));});
+  return s;
+}
+function fmt(s) {
+  if(s===null||s===undefined)return'—';
+  if(s===0)return'E';
+  return (s>0?'+':'')+s;
+}
+function scoreClass(s) { return s===null?'':s<0?'under':s>0?'over':'even'; }
+function best4(entry) {
+  const sc=[];
+  TIERS.forEach(t=>{const v=entry.scores&&entry.scores[t.id]!==undefined?entry.scores[t.id]:null; if(v!==null)sc.push(v);});
+  if(!sc.length)return null;
+  sc.sort((a,b)=>a-b);
+  return sc.slice(0,Math.min(5,sc.length)).reduce((s,v)=>s+v,0);
+}
+function anyScores() { return remoteData.entries.some(e=>e.scores&&Object.keys(e.scores).length>0); }
+function spin() { return '<div class="spinner"><div class="spin"></div></div>'; }
+function syncLine() { return lastSync?`<div class="sync-line">Synced ${lastSync.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`:''; }
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(name,btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='pick')        renderPickPage();
+  if(name==='field')       renderField();
+  if(name==='rules')       renderRules();
+  if(name==='leaderboard') initLeaderboard();
+  if(name==='admin')       renderAdmin();
+}
+
+// ── PICK PAGE ─────────────────────────────────────────────────────────────────
+async function renderPickPage() {
+  const el = document.getElementById('page-pick');
+  if (!configured()) {
+    el.innerHTML='<div class="card" style="padding:2rem;text-align:center;"><p style="color:rgba(245,240,232,.5);font-size:14px;">Pool not yet configured. Ask the admin to complete setup.</p></div>';
+    return;
+  }
+  const sub = sessionStorage.getItem('mp26_sub');
+  if (sub) {
+    el.innerHTML=`<div class="card success-panel"><div class="success-icon">&#x26F3;</div><h2>You're in, ${sub}!</h2><p style="margin-top:.5rem;color:rgba(245,240,232,.55);">Your picks are locked in.<br>Check the Leaderboard once the tournament begins.</p></div>`;
+    return;
+  }
+  el.innerHTML = spin();
+  await loadRemote();
+  const taken = takenPlayers();
+  let html = '<div class="card" style="margin-bottom:1rem;padding:1rem 1.25rem .5rem;">'
+    +'<div style="margin-bottom:1rem;"><label class="form-label">Your name</label>'
+    +'<input class="form-input" type="text" id="entryName" placeholder="Enter your name\u2026" /></div>'
+    +'<div><label class="form-label" style="padding:0 2px;">Your picks \u2014 one from each tier</label></div>';
+  TIERS.forEach((t,i)=>{
+    const picked=pendingPicks[t.id]||null;
+    html+=`<div class="tier-pick-row">
+      <span class="tier-pill" style="background:${TB[i]};color:${TC[i]};">${t.label}</span>
+      <span class="pick-player-name ${picked?'':'empty'}">${picked||'No pick yet'}</span>
+      <button class="pick-btn" onclick="openPicker(${t.id})">Pick</button>
+      ${picked?`<button class="pick-btn clear-btn" onclick="clearPick(${t.id})">\u2715</button>`:''}
+    </div>`;
+  });
+  const allPicked = TIERS.every(t=>pendingPicks[t.id]);
+  html+='</div><button class="submit-btn" onclick="submitEntry()" '+(allPicked?'':'disabled')+'>Submit My Picks</button>';
+  el.innerHTML=html;
+}
+
+function openPicker(tierId) {
+  const tier=TIERS.find(t=>t.id===tierId);
+  const taken=takenPlayers();
+  document.getElementById('pickerTitle').textContent=tier.label+' \u2014 '+tier.desc;
+  let html='';
+  tier.players.forEach(p=>{
+    const isTaken=taken.has(p)&&pendingPicks[tierId]!==p;
+    html+=`<div class="picker-item ${isTaken?'taken':''}" onclick="${isTaken?'':` pickPlayer(${tierId},'${p.replace(/'/g,"\\'")}') `}">${p}</div>`;
+  });
+  document.getElementById('pickerList').innerHTML=html;
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+function closePicker() { document.getElementById('pickerOverlay').classList.remove('open'); }
+function pickPlayer(tierId,name) { pendingPicks[tierId]=name; closePicker(); renderPickPage(); }
+function clearPick(tierId) { delete pendingPicks[tierId]; renderPickPage(); }
+
+async function submitEntry() {
+  const nameEl=document.getElementById('entryName');
+  const name=(nameEl?nameEl.value:'').trim();
+  if(!name){alert('Please enter your name.');return;}
+  if(remoteData.entries.find(e=>e.name.toLowerCase()===name.toLowerCase())){alert('That name is already taken \u2014 try a nickname!');return;}
+  if(!TIERS.every(t=>pendingPicks[t.id])){alert('Please make a pick for every tier.');return;}
+  const btn=document.querySelector('.submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Submitting\u2026';}
+  await loadRemote();
+  if(remoteData.entries.find(e=>e.name.toLowerCase()===name.toLowerCase())){
+    alert('That name was just taken \u2014 try a nickname!');
+    if(btn){btn.disabled=false;btn.textContent='Submit My Picks';}
+    return;
+  }
+  const picks={};
+  TIERS.forEach(t=>picks[t.id]=pendingPicks[t.id]);
+  remoteData.entries.push({name,picks,scores:{}});
+  const ok=await saveRemote();
+  if(!ok){
+    alert('Error saving \u2014 please try again.');
+    remoteData.entries.pop();
+    if(btn){btn.disabled=false;btn.textContent='Submit My Picks';}
+    return;
+  }
+  sessionStorage.setItem('mp26_sub',name);
+  pendingPicks={};
+  renderPickPage();
+}
+
+// ── RULES ─────────────────────────────────────────────────────────────────────
+function renderRules(){
+  document.getElementById('page-rules').innerHTML=`
+  <div class="card" style="padding:1.75rem 1.5rem;">
+    <div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:1.5rem;color:var(--gold);">How It Works</div>
+
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:.6rem;">The Draft</div>
+      <p style="font-size:14px;line-height:1.8;color:rgba(245,240,232,.8);">Each entry selects <strong>one golfer from each of the 6 tiers</strong> — giving you a team of 6 players. Tiers are grouped by skill level and odds to win, with Tier 1 being the strongest players and Tier 6 being the longest of long shots.</p>
+    </div>
+
+    <div style="border-top:.5px solid rgba(245,240,232,.08);padding-top:1.5rem;margin-bottom:1.5rem;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:.6rem;">Scoring</div>
+      <p style="font-size:14px;line-height:1.8;color:rgba(245,240,232,.8);">Your team score is the <strong>combined total score to par</strong> of your 5 best golfers — the single worst score from your 6 picks is dropped. The entry with the <strong>lowest cumulative score wins</strong>.</p>
+    </div>
+
+    <div style="border-top:.5px solid rgba(245,240,232,.08);padding-top:1.5rem;margin-bottom:1.5rem;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:.6rem;">Missed Cuts</div>
+      <p style="font-size:14px;line-height:1.8;color:rgba(245,240,232,.8);">If one of your golfers <strong>misses the cut or withdraws</strong>, they will still receive a score for any rounds they did not complete. Their score each of those days will be equal to the <strong>worst score shot that day by any player who made the cut</strong>. This keeps things fair without completely blowing up your team.</p>
+    </div>
+
+    <div style="border-top:.5px solid rgba(245,240,232,.08);padding-top:1.5rem;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:.6rem;">Money</div>
+      <p style="font-size:14px;line-height:1.8;color:rgba(245,240,232,.8);">If you'd like to play for money, Venmo <strong style="color:var(--gold);">@AidanMacaluso</strong> $10. The pot goes to the winner. <strong>In the event of a tie, the money will be split evenly among the winners.</strong></p>
+    </div>
+  </div>`;
+}
+
+// ── FIELD ─────────────────────────────────────────────────────────────────────
+function renderField() {
+  const taken=takenPlayers();
+  let html='';
+  TIERS.forEach((t,i)=>{
+    html+=`<div class="card" style="margin-bottom:.75rem;">
+      <div class="tier-header-row">
+        <div class="tier-dot" style="background:${TC[i]};"></div>
+        <span class="tier-name" style="color:${TC[i]};">${t.label}</span>
+        <span class="tier-desc">${t.desc}</span>
+        <span class="tier-count">${t.players.length} players</span>
+      </div>
+      <div class="player-grid">`;
+    t.players.forEach(p=>{
+      html+=`<div class="player-chip ${taken.has(p)?'taken':''}"><span class="pname">${p}</span></div>`;
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('page-field').innerHTML=html;
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────────────────────────
+async function initLeaderboard() {
+  const el=document.getElementById('page-leaderboard');
+  if(!configured()){el.innerHTML='<div class="card lb-hidden-note"><div class="lock">&#x1F512;</div><p>Pool not yet configured.</p></div>';return;}
+  el.innerHTML=spin();
+  await loadRemote();
+  renderLeaderboard();
+}
+function renderLeaderboard() {
+  const el=document.getElementById('page-leaderboard');
+  if(!remoteData.settings.picksVisible&&!isAdmin){
+    el.innerHTML='<div class="card lb-hidden-note"><div class="lock">&#x1F512;</div><p>Picks are hidden until the tournament begins.<br>The leaderboard will go live once the admin reveals them.</p></div>';
+    return;
+  }
+  if(!remoteData.entries.length){
+    el.innerHTML='<div class="card" style="padding:2rem;text-align:center;"><p style="color:rgba(245,240,232,.4);font-size:14px;">No entries yet.</p></div>';
+    return;
+  }
+  const hasScores=anyScores();
+  const ranked=[...remoteData.entries].map(e=>({...e,total:best4(e)}))
+    .sort((a,b)=>{
+      if(!hasScores)return 0;
+      if(a.total===null&&b.total===null)return 0;
+      if(a.total===null)return 1; if(b.total===null)return -1;
+      return a.total-b.total;
+    });
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <span class="entry-count-badge">${remoteData.entries.length} entr${remoteData.entries.length===1?'y':'ies'}</span>
+    <button class="refresh-btn" onclick="initLeaderboard()">&#x21BB; Refresh</button>
+  </div>`;
+  if(!hasScores) html+='<div class="no-scores-note">Scores will appear once the tournament begins.</div>';
+  ranked.forEach((e,idx)=>{
+    const first=hasScores&&idx===0&&e.total!==null;
+    const ts=hasScores?fmt(e.total):'—';
+    const sc=hasScores?scoreClass(e.total):'';
+    html+=`<div class="lb-row card ${first?'first':''}">
+      <div class="lb-rank">${hasScores?idx+1:'—'}</div>
+      <div>
+        <div class="lb-name">${e.name}</div>
+        <div class="lb-picks">`;
+    TIERS.forEach((t,ti)=>{
+      const pick=e.picks[t.id]||'—';
+      const ps=e.scores&&e.scores[t.id]!==undefined?fmt(e.scores[t.id]):'';
+      html+=`<span class="lb-pill" style="background:${TB[ti]};color:${TC[ti]};">${pick}${hasScores&&ps?' ('+ps+')':''}</span>`;
+    });
+    html+=`</div></div>
+      <div class="lb-score-col">
+        <div class="lb-score ${sc}">${ts}</div>
+        ${hasScores&&e.total!==null?'<div class="lb-detail">best 5 of 6</div>':''}
+      </div>
+    </div>`;
+  });
+  html+=syncLine();
+  el.innerHTML=html;
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+function renderAdmin() {
+  const el=document.getElementById('page-admin');
+  if(!isAdmin){
+    el.innerHTML=`<div style="max-width:360px;margin:0 auto;padding:2rem 0;">
+      <div class="card" style="padding:1.5rem;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:1.25rem;text-align:center;">Admin Access</div>
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="adminPw" placeholder="Enter password\u2026" onkeydown="if(event.key==='Enter')checkAdmin()" />
+        <button class="submit-btn" style="margin-top:1rem;font-size:15px;padding:11px;" onclick="checkAdmin()">Enter</button>
+        <div id="adminErr"></div>
+      </div>
+    </div>`;
+    return;
+  }
+  loadAdminPanel();
+}
+function checkAdmin(){
+  if(document.getElementById('adminPw').value===ADMIN_PASS){isAdmin=true;renderAdmin();}
+  else document.getElementById('adminErr').innerHTML='<div class="alert-box">Incorrect password.</div>';
+}
+
+// ── SETUP ─────────────────────────────────────────────────────────────────────
+function renderSetup(){
+  document.getElementById('page-admin').innerHTML=`
+  <div style="max-width:500px;margin:0 auto;padding:1rem 0;">
+    <div class="card" style="padding:1.5rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:.25rem;">One-time setup</div>
+      <p style="font-size:13px;color:rgba(245,240,232,.55);margin-bottom:1.5rem;line-height:1.7;">Connect a free JSONBin database so all picks and scores sync across every device.</p>
+
+      <div class="setup-step"><div class="step-num">1</div><div class="step-text">Go to <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> and create a <strong>free account</strong>.</div></div>
+      <div class="setup-step"><div class="step-num">2</div><div class="step-text">In your dashboard click <strong>API Keys</strong>, create a new <strong>Master Key</strong> and copy it.</div></div>
+      <div class="setup-step"><div class="step-num">3</div><div class="step-text">Paste it below and click <strong>Create &amp; Connect</strong>. The Bin ID is created automatically.</div></div>
+
+      <label class="form-label" style="margin-top:.5rem;">Master Key</label>
+      <input class="form-input" type="text" id="setupKey" placeholder="\$2a\$10\$\u2026" style="margin-bottom:1rem;" />
+      <button class="admin-btn gold" style="width:100%;" onclick="doSetup()">Create &amp; Connect</button>
+      <div id="setupMsg"></div>
+
+      <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:.5px solid rgba(245,240,232,.1);">
+        <p style="font-size:12px;color:rgba(245,240,232,.4);margin-bottom:.75rem;">Already have a Bin ID? Enter both manually:</p>
+        <label class="form-label">Master Key</label>
+        <input class="form-input" type="text" id="manKey" placeholder="\$2a\$10\$\u2026" style="margin-bottom:.75rem;" />
+        <label class="form-label">Bin ID</label>
+        <input class="form-input" type="text" id="manBin" placeholder="6\u2026" style="margin-bottom:.75rem;" />
+        <button class="admin-btn gold" onclick="saveManual()">Save</button>
+      </div>
+    </div>
+  </div>`;
+}
+async function doSetup(){
+  const key=document.getElementById('setupKey').value.trim();
+  if(!key){document.getElementById('setupMsg').innerHTML='<div class="alert-box">Please enter your API key.</div>';return;}
+  const btn=event.target; btn.textContent='Creating\u2026'; btn.disabled=true;
+  const id=await createBin(key);
+  if(!id){
+    document.getElementById('setupMsg').innerHTML='<div class="alert-box">Failed \u2014 double-check your key and try again.</div>';
+    btn.textContent='Create & Connect'; btn.disabled=false; return;
+  }
+  API_KEY=key; BIN_ID=id;
+  localStorage.setItem('mp26_api_key',key); localStorage.setItem('mp26_bin_id',id);
+  document.getElementById('setupMsg').innerHTML=`<div class="success-box">&#x2713; Done! Bin ID: <inlinecode>${id}</inlinecode><br><span style="font-size:12px;opacity:.8;">Save this ID in case you need it later. Loading\u2026</span></div>`;
+  setTimeout(()=>loadAdminPanel(),1800);
+}
+function saveManual(){
+  const key=document.getElementById('manKey').value.trim();
+  const bin=document.getElementById('manBin').value.trim();
+  if(!key||!bin){alert('Please fill in both fields.');return;}
+  API_KEY=key; BIN_ID=bin;
+  localStorage.setItem('mp26_api_key',key); localStorage.setItem('mp26_bin_id',bin);
+  loadAdminPanel();
+}
+
+// ── ADMIN PANEL ───────────────────────────────────────────────────────────────
+async function loadAdminPanel(){
+  const el=document.getElementById('page-admin');
+  el.innerHTML=spin();
+  await loadRemote();
+  buildAdminPanel();
+}
+function buildAdminPanel(){
+  const el=document.getElementById('page-admin');
+  const entries=remoteData.entries;
+
+  let html=`<div class="card" style="padding:.75rem 1rem;margin-bottom:1rem;">
+    <div class="toggle-row">
+      <span class="toggle-label">Picks &amp; leaderboard visible to everyone</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="visToggle" ${remoteData.settings.picksVisible?'checked':''} onchange="toggleVis()" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>`;
+
+  if(!entries.length){
+    html+='<div class="card" style="padding:2rem;text-align:center;"><p style="color:rgba(245,240,232,.4);font-size:14px;">No entries yet.</p></div>';
+    html+='<div style="display:flex;gap:10px;margin-top:1rem;"><button class="admin-btn muted" onclick="loadAdminPanel()">&#x21BB; Reload</button><button class="admin-btn danger" onclick="logoutAdmin()">Log Out</button></div>';
+    el.innerHTML=html; return;
+  }
+
+  html+='<div class="scroll-hint">\u2190 scroll right to see all tiers \u2192</div><div class="overflow-table">';
+  html+=`<div class="admin-row header-row" style="min-width:680px;"><div>Entry</div>`;
+  TIERS.forEach((t,i)=>html+=`<div style="color:${TC[i]};text-align:center;">${t.label}</div>`);
+  html+='<div></div></div>';
+
+  entries.forEach((e,ei)=>{
+    html+=`<div class="admin-row" style="min-width:680px;"><div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;">${e.name}</div>`;
+    TIERS.forEach(t=>{
+      const pick=e.picks[t.id]||'—';
+      const val=e.scores&&e.scores[t.id]!==undefined?e.scores[t.id]:'';
+      const short=pick.split(' ').pop();
+      html+=`<div style="text-align:center;">
+        <div style="font-size:9px;color:rgba(245,240,232,.4);margin-bottom:2px;overflow:hidden;white-space:nowrap;" title="${pick}">${short}</div>
+        <input class="score-in" type="number" value="${val}" placeholder="\u2014" id="sc_${ei}_${t.id}" />
+      </div>`;
+    });
+    html+=`<div><button class="del-btn" onclick="delEntry(${ei})">\u2715</button></div></div>`;
+  });
+  html+='</div>';
+  html+=syncLine();
+  html+=`<div style="display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap;">
+    <button class="admin-btn gold" onclick="adminSave()">Save All Scores</button>
+    <button class="admin-btn muted" onclick="loadAdminPanel()">&#x21BB; Reload</button>
+    <button class="admin-btn danger" onclick="logoutAdmin()">Log Out</button>
+  </div>`;
+  el.innerHTML=html;
+}
+
+async function toggleVis(){
+  remoteData.settings.picksVisible=document.getElementById('visToggle').checked;
+  await saveRemote();
+}
+async function adminSave(){
+  remoteData.entries.forEach((e,ei)=>{
+    if(!e.scores)e.scores={};
+    TIERS.forEach(t=>{
+      const inp=document.getElementById('sc_'+ei+'_'+t.id);
+      if(!inp)return;
+      const v=inp.value;
+      if(v==='')delete e.scores[t.id]; else e.scores[t.id]=parseInt(v);
+    });
+  });
+  const btn=event.target; btn.textContent='Saving\u2026'; btn.disabled=true;
+  const ok=await saveRemote();
+  btn.disabled=false;
+  btn.textContent=ok?'Saved \u2713':'Error \u2014 retry';
+  setTimeout(()=>btn.textContent='Save All Scores',2200);
+}
+async function delEntry(i){
+  if(!confirm('Delete entry for '+remoteData.entries[i].name+'?'))return;
+  remoteData.entries.splice(i,1);
+  await saveRemote();
+  buildAdminPanel();
+}
+function logoutAdmin(){ isAdmin=false; renderAdmin(); }
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderPickPage();
+renderField();
+</script>
+</body>
+</html>
